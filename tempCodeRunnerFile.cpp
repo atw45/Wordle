@@ -1,0 +1,1 @@
+update_guessed_letters(guess, answer, guessed_letters)

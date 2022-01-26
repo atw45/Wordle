@@ -1,10 +1,5 @@
-// TODO!!!  Split print_guess into two functions: 
-//              - a function that updates the pair vector (guessed_letters)
-//              - a void function that prints the guess, given the updated vector
-
 #include <iostream>
 #include <vector>
-//#include <utility>
 
 using namespace std;
 
@@ -47,10 +42,11 @@ string bold_yellow(char c) { return "\033[1;33m" + string(1, c) + "\033[0m"; }
 
 string bold_green(char c) { return "\033[1;32m" + string(1, c) + "\033[0m"; }
 
-vector<pair <int, char> > print_guess(string guess, string answer, vector<pair <int, char> > guessed_letters) {
+// when the user inputs a guess, flag each letter in the alphabet to white, green, yellow, or grey.
+vector<pair <int, char> > update_guessed_letters(string guess, string answer, vector<pair <int, char> > guessed_letters) {
     guess = toupper_string(guess);
     answer = toupper_string(answer);
-    
+
     string wrong_letters = answer;
     string ngl = ""; // a string of non-green letters in the answer
 
@@ -63,31 +59,48 @@ vector<pair <int, char> > print_guess(string guess, string answer, vector<pair <
                     ngl = "RBT".
     */
 
-    // now print the guess with the appropriate colours
+    // now set the guessed letters to the appropriate colours
     for (int i = 0; i < guess.length(); i++) {
 
         if (guess[i] == answer[i]) {
-            /*  if the i-th letter in guess == i-th letter in answer, print letter in green. */
-            cout << bold_green(guess[i]);
+            /*  if the i-th letter in guess == i-th letter in answer, set letter to green. */
             guessed_letters[guess[i]-65].first = 3;
 
         } else if (ngl.find(guess[i]) != string::npos) {
             /*  otherwise, if the i-th letter in guess is still in ngl:
                     - remove the letter from ngl ONCE
-                    - print letter in yellow
+                    - set letter to yellow
             */
             ngl = remove_char(guess[i], ngl);
-            cout << bold_yellow(guess[i]);
             guessed_letters[guess[i]-65].first = 2;
 
         } else {
-            /*  otherwise, the i-th letter in guess is not in ngl, so print it in grey. */
-            cout << bold_grey(guess[i]);
+            /*  otherwise, the i-th letter in guess is not in ngl at all, so set it to grey. */
             guessed_letters[guess[i]-65].first = 1;
         }
     }
-    cout << "\n";
     return guessed_letters;
+}
+
+void print_guess(string guess, vector<pair <int, char> > guessed_letters) {
+    guess = toupper_string(guess);
+    
+    for (int i = 0; i < guess.length(); i++) {
+        switch (guessed_letters[guess[i]-65].first) {
+            case 0:
+                break;
+            case 1:
+                cout << bold_grey(guess[i]);
+                break;
+            case 2:
+                cout << bold_yellow(guess[i]);
+                break;
+            case 3:
+                cout << bold_green(guess[i]);
+                break;
+        }
+    }
+    cout << "\n";
 }
 
 void print_alphabet(vector<pair <int, char> > guessed_letters) {
@@ -148,7 +161,8 @@ int main() {
         cout << "\n";
 
         if (toupper_string(guess) == toupper_string(answer)) {
-            guessed_letters = print_guess(guess, answer, guessed_letters);
+            guessed_letters = update_guessed_letters(guess, answer, guessed_letters);
+            print_guess(guess, guessed_letters);
             won = true;
             break;
         } else if (guess.length() != 5)
@@ -156,7 +170,8 @@ int main() {
         else if (guess.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ") != string::npos)
             cout << "\033[1;37mPlease do not include numbers or special characters in your guess.\033[0m\n";
         else {
-            guessed_letters = print_guess(guess, answer, guessed_letters);
+            guessed_letters = update_guessed_letters(guess, answer, guessed_letters);
+            print_guess(guess, guessed_letters);
             print_alphabet(guessed_letters);
             guesses_left--;
         }
